@@ -1,12 +1,30 @@
-FROM node:20
+name: Build (20.x)
 
-RUN apt-get update && apt-get install -y python3 make g++
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
-WORKDIR /app
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧩 Checkout Source
+        uses: actions/checkout@v4
 
-COPY package*.json ./
-RUN npm install
+      - name: 🧰 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
 
-COPY . .
+      - name: 📦 Initialize
+        run: |
+          npm install
+          npm install request-promise --save
 
-CMD ["npm", "start"]
+      - name: 🚀 Launch Bot
+        env:
+          FB_EMAIL: ${{ secrets.FB_EMAIL }}
+          FB_PASSWORD: ${{ secrets.FB_PASSWORD }}
+          FB_COOKIE: ${{ secrets.FB_COOKIE }}
+        run: node index.js 
